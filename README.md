@@ -1,8 +1,19 @@
 # email-deliverability
 
-Honest email validation for Node.js and Bun: syntax, normalization, DNS MX,
-provider inference, disposable/free-provider signals, typo hints, and SMTP
-diagnostics without pretending SMTP proves mailbox existence.
+[![npm version](https://img.shields.io/npm/v/email-deliverability?color=0f766e)](https://www.npmjs.com/package/email-deliverability)
+[![npm downloads](https://img.shields.io/npm/dm/email-deliverability)](https://www.npmjs.com/package/email-deliverability)
+[![TypeScript types](https://img.shields.io/npm/types/email-deliverability)](https://www.npmjs.com/package/email-deliverability)
+[![Node.js](https://img.shields.io/node/v/email-deliverability)](https://www.npmjs.com/package/email-deliverability)
+[![runtime deps](https://img.shields.io/badge/runtime%20deps-0-2ea043)](https://www.npmjs.com/package/email-deliverability)
+[![packed size](https://img.shields.io/badge/packed-%3C100%20KiB-2563eb)](https://www.npmjs.com/package/email-deliverability)
+[![license](https://img.shields.io/npm/l/email-deliverability)](https://github.com/onlyoneaman/email-deliverability/blob/main/LICENSE)
+
+Modern email validation and deliverability checks for Node.js and Bun.
+
+Validate syntax, normalize addresses, check DNS MX/Null MX/A/AAAA fallback,
+infer mail providers, flag disposable and free-provider domains, suggest typo
+fixes, and run opt-in SMTP diagnostics without pretending SMTP proves mailbox
+existence.
 
 ## Install
 

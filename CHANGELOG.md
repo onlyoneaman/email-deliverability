@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.4.1 - 2026-06-24
+
+- Improved the npm README header with clearer positioning and trust badges.
+- Refreshed package metadata for email validation and deliverability search terms.
+
 ## 0.4.0 - 2026-06-24
 
 - Added Gmail, Yahoo/AOL, HEY, mail.com, and GMX provider IDs.
