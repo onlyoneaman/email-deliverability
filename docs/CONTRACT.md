@@ -12,7 +12,7 @@ It does not promise inbox placement and does not guarantee that a specific mailb
 
 Primary README line:
 
-> Honest email validation for Node.js and Bun: syntax, normalization, DNS MX checks, disposable/free-provider signals, and optional SMTP diagnostics without pretending SMTP proves mailbox existence.
+> Honest email validation for Node.js and Bun: syntax, normalization, DNS MX, provider inference, disposable/free-provider signals, typo hints, and SMTP diagnostics without pretending SMTP proves mailbox existence.
 
 ## Runtime and packaging
 
