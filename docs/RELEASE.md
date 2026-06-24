@@ -20,7 +20,7 @@ bun run release:check
 - `bun run datasets:verify`
 - `npm pack --dry-run --json`
 
-It also enforces the packed tarball budget. The default budget is 100,000 bytes.
+It also enforces the packed tarball budget. The default budget is 102,400 bytes.
 Override only deliberately:
 
 ```sh

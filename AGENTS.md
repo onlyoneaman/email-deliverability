@@ -27,7 +27,7 @@ artifact.
 
 - Do not edit `.github/workflows/*` unless the user explicitly asks for CI work.
 - Do not introduce runtime dependencies casually; packed size target is under
-  100 KB.
+  100 KiB (102,400 bytes).
 - Do not publish `src/`, `tests/`, `docs/`, or `scripts/` in the npm tarball
   unless the package contract is deliberately changed.
 - Do not make SMTP probing default-proof of mailbox existence. It is diagnostic

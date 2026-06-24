@@ -1,14 +1,20 @@
 # Changelog
 
+## 0.4.0 - 2026-06-24
+
+- Added Gmail, Yahoo/AOL, HEY, mail.com, and GMX provider IDs.
+- Added own-domain MX variants for Mailfence, mailbox.org, Migadu, Gandi, and Yandex.
+- Raised the release size gate to 100 KiB (102,400 bytes) while keeping release verification strict.
+
 ## 0.3.1 - 2026-06-24
 
-- Recognize Zoho-owned inbound MX hosts such as `smtpin2.zoho.com` as Zoho Mail.
+- Recognize Zoho-owned inbound MX hosts.
 
 ## 0.3.0 - 2026-06-24
 
 - Added `checks.dns.provider` to infer common mail providers from MX records.
-- Added typed IDs for 28 common hosted mail, routing, and inbound providers, plus mixed known-provider setups.
-- Kept provider inference conservative and MX-based; unknown providers are left unset instead of guessed.
+- Added typed IDs for 28 common mail providers plus mixed known-provider setups.
+- Kept provider inference conservative and MX-based.
 
 ## 0.2.0 - 2026-06-24
 

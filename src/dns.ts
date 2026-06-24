@@ -298,6 +298,12 @@ function isNoDataError(error: unknown): boolean {
 type ProviderRule = readonly [Exclude<DnsProviderId, "mixed">, string, DnsProviderInfo["confidence"], readonly RegExp[]];
 
 const PROVIDER_RULES: readonly ProviderRule[] = [
+  ["gmail", "Gmail", "high", [/^(alt\d+\.)?gmail-smtp-in\.l\.google\.com$/]],
+  ["yahoo_mail", "Yahoo Mail", "high", [/^mta\d+\.[a-z0-9]+\.yahoodns\.net$/]],
+  ["aol_mail", "AOL Mail", "high", [/^mx-aol\.mail\.gm\d+\.yahoodns\.net$/]],
+  ["hey", "HEY", "high", [/^home-mx\.app\.hey\.com$/]],
+  ["mail_com", "mail.com", "high", [/^mx0[01]\.mail\.com$/]],
+  ["gmx_mail", "GMX Mail", "high", [/^mx0[01]\.gmx\.net$/]],
   ["google_workspace", "Google Workspace", "high", [/^(aspmx\d*|alt\d+\.aspmx)\.l\.google\.com$/, /^aspmx\d*\.googlemail\.com$/, /^smtp\.google\.com$/]],
   ["microsoft_365", "Microsoft 365", "high", [/\.mail\.protection\.outlook\.com$/, /\.mail\.eo\.outlook\.com$/, /\.olc\.protection\.outlook\.com$/]],
   ["cloudflare_email_routing", "Cloudflare Email Routing", "high", [/^route\d+\.mx\.cloudflare\.net$/]],
@@ -305,7 +311,7 @@ const PROVIDER_RULES: readonly ProviderRule[] = [
   ["zoho_mail", "Zoho Mail", "high", [/^mx\d*\.zoho\.(com|eu|in|com\.au|jp|cn)$/, /^mx\d*\.zohomail\.(com|eu)$/, /^smtpin\d*\.zoho\.com$/]],
   ["proton_mail", "Proton Mail", "high", [/^(mail|mailsec)\.protonmail\.ch$/, /^(mail|mailsec)\.proton\.me$/]],
   ["icloud_mail", "iCloud Mail", "high", [/^mx0[12]\.mail\.icloud\.com$/]],
-  ["yandex_mail", "Yandex Mail", "high", [/^mx\.yandex\.net$/]],
+  ["yandex_mail", "Yandex Mail", "high", [/^mx\.yandex\.(net|ru)$/]],
   ["tencent_exmail", "Tencent Exmail", "high", [/^mxbiz[12]\.qq\.com$/]],
   ["alibaba_cloud_mail", "Alibaba Cloud Mail", "high", [/^mx[12]\.qiye\.aliyun\.com$/, /^mx[12]\.aliyun\.com$/]],
   ["namecheap_private_email", "Namecheap Private Email", "high", [/^mx[12]\.privateemail\.com$/]],
@@ -319,12 +325,12 @@ const PROVIDER_RULES: readonly ProviderRule[] = [
   ["rackspace_email", "Rackspace Email", "high", [/^mx[12]\.emailsrvr\.com$/]],
   ["godaddy_email", "GoDaddy Email", "medium", [/^(smtp|mailstore1)\.secureserver\.net$/]],
   ["dreamhost_email", "DreamHost Email", "high", [/^mx[12]\.dreamhost\.com$/]],
-  ["gandi_mail", "Gandi Mail", "high", [/^(spool|fb)\.mail\.gandi\.net$/]],
-  ["mailbox_org", "mailbox.org", "high", [/^mxext[123]\.mailbox\.org$/]],
-  ["migadu", "Migadu", "high", [/^aspmx[12]\.migadu\.com$/]],
+  ["gandi_mail", "Gandi Mail", "high", [/^(spool|fb)\.mail\.gandi\.net$/, /^mail\d+\.gandi\.net$/]],
+  ["mailbox_org", "mailbox.org", "high", [/^mxext[123]\.mailbox\.org$/, /^mx\d?(-n)?\.mailbox\.org$/]],
+  ["migadu", "Migadu", "high", [/^aspmx[12]\.migadu\.com$/, /^mx\.migadu\.com$/]],
   ["purelymail", "Purelymail", "high", [/^mailserver\.purelymail\.com$/]],
   ["tuta_mail", "Tuta Mail", "high", [/^(mail|mailsec)\.tutanota\.de$/]],
-  ["mailfence", "Mailfence", "high", [/^mx[12]\.mailfence\.com$/]],
+  ["mailfence", "Mailfence", "high", [/^mx[12]\.mailfence\.com$/, /^smtp[12]\.mailfence\.com$/]],
   ["mxroute", "MXroute", "medium", [/\.(mxrouting|mxlogin)\.com$/]],
 ];
 

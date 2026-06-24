@@ -45,6 +45,12 @@ export type DnsDeliverabilityCheck = CheckBase & {
 };
 
 export type DnsProviderId =
+  | "gmail"
+  | "yahoo_mail"
+  | "aol_mail"
+  | "hey"
+  | "mail_com"
+  | "gmx_mail"
   | "google_workspace"
   | "microsoft_365"
   | "cloudflare_email_routing"

@@ -59,6 +59,12 @@ describe("DNS deliverability", () => {
 
   test("infers common mail providers from MX records", async () => {
     const cases = [
+      ["gmail-smtp-in.l.google.com", "gmail", "Gmail"],
+      ["mta5.am0.yahoodns.net", "yahoo_mail", "Yahoo Mail"],
+      ["mx-aol.mail.gm0.yahoodns.net", "aol_mail", "AOL Mail"],
+      ["home-mx.app.hey.com", "hey", "HEY"],
+      ["mx00.mail.com", "mail_com", "mail.com"],
+      ["mx01.gmx.net", "gmx_mail", "GMX Mail"],
       ["ASPMX.L.GOOGLE.COM", "google_workspace", "Google Workspace"],
       ["example-com.mail.protection.outlook.com", "microsoft_365", "Microsoft 365"],
       ["route1.mx.cloudflare.net", "cloudflare_email_routing", "Cloudflare Email Routing"],
@@ -82,11 +88,15 @@ describe("DNS deliverability", () => {
       ["smtp.secureserver.net", "godaddy_email", "GoDaddy Email"],
       ["mx1.dreamhost.com", "dreamhost_email", "DreamHost Email"],
       ["spool.mail.gandi.net", "gandi_mail", "Gandi Mail"],
+      ["mail12.gandi.net", "gandi_mail", "Gandi Mail"],
       ["mxext1.mailbox.org", "mailbox_org", "mailbox.org"],
+      ["mx-n.mailbox.org", "mailbox_org", "mailbox.org"],
       ["aspmx1.migadu.com", "migadu", "Migadu"],
+      ["mx.migadu.com", "migadu", "Migadu"],
       ["mailserver.purelymail.com", "purelymail", "Purelymail"],
       ["mail.tutanota.de", "tuta_mail", "Tuta Mail"],
       ["mx1.mailfence.com", "mailfence", "Mailfence"],
+      ["smtp2.mailfence.com", "mailfence", "Mailfence"],
       ["one.mxrouting.com", "mxroute", "MXroute"],
     ] as const;
 

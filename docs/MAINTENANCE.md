@@ -89,7 +89,7 @@ internal i18n keys as the public message contract; callers should use structured
 
 ## Package Budget
 
-The target packed size is under 100 KB. The generated domain data is the main
+The target packed size is under 100 KiB (102,400 bytes). The generated domain data is the main
 size driver, so avoid adding runtime dependencies or bundled duplicate datasets.
 
 If package size grows, first check:

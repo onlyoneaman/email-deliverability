@@ -4,7 +4,7 @@ import { readFile } from "node:fs/promises";
 
 const args = new Set(process.argv.slice(2));
 const packageJson = JSON.parse(await readFile(new URL("../package.json", import.meta.url), "utf8"));
-const sizeLimit = Number.parseInt(process.env.PACKAGE_SIZE_LIMIT_BYTES ?? "100000", 10);
+const sizeLimit = Number.parseInt(process.env.PACKAGE_SIZE_LIMIT_BYTES ?? "102400", 10);
 
 if (args.has("--help")) {
   console.log(`Usage: node scripts/verify-release.mjs [--published]

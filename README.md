@@ -1,7 +1,7 @@
 # email-deliverability
 
-Honest email validation for Node.js and Bun: syntax, normalization, DNS MX
-checks, disposable/free-provider signals, typo hints, and optional SMTP
+Honest email validation for Node.js and Bun: syntax, normalization, DNS MX,
+provider inference, disposable/free-provider signals, typo hints, and SMTP
 diagnostics without pretending SMTP proves mailbox existence.
 
 ## Install
@@ -34,8 +34,7 @@ if (result.recommendation === "accept" && result.parsed) {
 ```
 
 Use `status`, `reason`, and `recommendation` for product decisions. Use
-`checks`, `issues`, and `decision.blockedBy` when you need the detailed audit
-trail behind that summary.
+`checks`, `issues`, and `decision.blockedBy` for the audit trail.
 
 `valid` and `decision.accepted` reflect the blocking policy you configured.
 They can stay `true` for diagnostic findings, such as SMTP rejection without
@@ -44,10 +43,10 @@ They can stay `true` for diagnostic findings, such as SMTP rejection without
 ## What This Checks
 
 - Syntax and normalization, including IDN domains.
-- DNS mail deliverability through MX records, Null MX, and A/AAAA fallback.
+- DNS mail deliverability through MX, Null MX, A/AAAA fallback, and provider inference.
 - Optional disposable-domain and free-provider signals.
 - Optional conservative typo suggestions.
-- Optional SMTP diagnostics for operators who understand the tradeoffs.
+- SMTP diagnostics for operators who understand the tradeoffs.
 
 ## What This Cannot Prove
 
@@ -221,9 +220,8 @@ result.issues; // stable codes, stages, messages, paths
 result.decision.blockedBy; // policy decisions only
 ```
 
-DNS provider inference is based on MX hostnames and is conservative. Unknown
-providers are left unset; mixed known MX providers return `provider.id:
-"mixed"`.
+DNS provider inference is MX-based and conservative. Unknown providers are
+unset; mixed known providers return `provider.id: "mixed"`.
 
 Machine-readable `issue.code`, `issue.stage`, `issue.path`, and
 `issue.params` are the integration surface. `issue.message` is display text.
@@ -288,9 +286,9 @@ quota, and no remote verification service.
 
 ## Package Size
 
-The npm tarball target is under 100 KB while shipping built-in free-provider and
-disposable-domain datasets. `bun run release:check` enforces the size budget and
-pack allowlist.
+The npm tarball target is under 100 KiB while shipping built-in free-provider
+and disposable-domain datasets. `bun run release:check` enforces the size budget
+and pack allowlist.
 
 ## Maintainers
 

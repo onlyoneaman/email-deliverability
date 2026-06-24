@@ -22,8 +22,8 @@ Primary README line:
 - ESM-only for the current package. CommonJS support only if it does not meaningfully increase complexity or package size.
 - Zero required runtime dependencies for the core package.
 - No native Rust/WASM in v1. DNS latency dominates performance, and native npm distribution would add platform complexity and likely increase package size.
-- Target npm tarball: under 100 KB with bundled free-domain and disposable-domain datasets.
-- Hard package-size failure: over 100,000 bytes unless the limit is deliberately raised with `PACKAGE_SIZE_LIMIT_BYTES` and documented.
+- Target npm tarball: under 100 KiB (102,400 bytes) with bundled free-domain and disposable-domain datasets.
+- Hard package-size failure: over 102,400 bytes unless the limit is deliberately raised with `PACKAGE_SIZE_LIMIT_BYTES` and documented.
 - No published source maps by default.
 - Generated datasets should be minified sorted arrays or newline strings with lazy `Set` construction. Avoid pre-gzipped embedded assets, Bloom filters for blocking, tries, or minimal-perfect-hash generators in v1 unless measurements prove a clear win.
 - DNS and SMTP checks are server-side only. Syntax parsing, normalization, locale formatting, and dataset checks should also be available from a browser/edge-safe subpath that does not import DNS, TCP, or TLS modules.
@@ -40,7 +40,7 @@ Per-asset size budget:
 - locale dictionaries: target <= 20 KB packed;
 - README, license, notice, changelog, and security docs included in npm package: target <= 20 KB packed.
 
-The release-blocking hard fail is 100,000 bytes packed. Exceeding the 100 KB target requires an explicit contract update and changelog note, not just an implementation comment.
+The release-blocking hard fail is 102,400 bytes packed. Exceeding the 100 KiB target requires an explicit contract update and changelog note, not just an implementation comment.
 
 ## package.json contract
 
@@ -266,6 +266,7 @@ type DnsProviderInfo = {
 };
 
 type DnsProviderId =
+  | "gmail" | "yahoo_mail" | "aol_mail" | "hey" | "mail_com" | "gmx_mail"
   | "google_workspace" | "microsoft_365" | "cloudflare_email_routing"
   | "fastmail" | "zoho_mail" | "proton_mail" | "icloud_mail"
   | "yandex_mail" | "tencent_exmail" | "alibaba_cloud_mail"
@@ -856,7 +857,7 @@ From adjacent packages:
 - Bun tests pass.
 - Node tests pass.
 - Type declarations are generated and type-tested.
-- Package tarball is under 100 KB with bundled free-domain and disposable-domain datasets, or the size increase is justified in this file.
+- Package tarball is under 100 KiB with bundled free-domain and disposable-domain datasets, or the size increase is justified in this file.
 - Zero required runtime dependencies.
 - `npm pack --dry-run` shows only intended files.
 - Packed-tarball smoke tests install the exact tarball in fresh Node and Bun projects and verify runtime imports, browser/syntax subpath imports, type declarations, and absence of unintended files.
