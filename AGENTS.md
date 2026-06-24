@@ -41,6 +41,8 @@ artifact.
 - Syntax export: `email-deliverability/syntax`, parser/normalizer only.
 - Browser export: `email-deliverability/browser`, browser-safe parsing/dataset
   helpers only.
+- Current package format is ESM-only. Do not add CommonJS output unless there is
+  a measured compatibility need and the package-size tradeoff is explicit.
 
 Browser-safe exports must not import `node:`, DNS, TCP, or TLS modules.
 

@@ -19,7 +19,7 @@ Primary README line:
 - Node.js and Bun support via standard APIs.
 - Built and tested first with Bun, but positioned as a Node.js and Bun package.
 - TypeScript source, bundled `.d.ts`, strict public types.
-- ESM first. CommonJS support only if it does not meaningfully increase complexity or package size.
+- ESM-only for the current package. CommonJS support only if it does not meaningfully increase complexity or package size.
 - Zero required runtime dependencies for the core package.
 - No native Rust/WASM in v1. DNS latency dominates performance, and native npm distribution would add platform complexity and likely increase package size.
 - Target npm tarball: under 100 KB with bundled free-domain and disposable-domain datasets.

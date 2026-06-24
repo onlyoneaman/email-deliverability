@@ -27,6 +27,7 @@ release gates must be useful without relying on GitHub Actions.
 - Main export: server-side Bun and Node API.
 - `email-deliverability/syntax`: syntax and normalization only.
 - `email-deliverability/browser`: browser-safe parsing and dataset helpers.
+- Package format is ESM-only. CommonJS callers can use dynamic `import()`.
 
 Browser-safe exports must not import `node:`, DNS, TCP, or TLS modules. Keep the
 packaging test for this invariant.

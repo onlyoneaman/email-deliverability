@@ -87,6 +87,7 @@ remote verification API. DNS and SMTP are server-side only.
 - `email-deliverability`: full Node.js/Bun server API.
 - `email-deliverability/syntax`: parsing and normalization only.
 - `email-deliverability/browser`: browser-safe parsing and dataset helpers.
+- The package is ESM-only. CommonJS projects should use dynamic `import()`.
 
 Browsers, edge runtimes, serverless platforms, and containers may block DNS or
 port 25. Disable those checks when they do not fit your runtime.
