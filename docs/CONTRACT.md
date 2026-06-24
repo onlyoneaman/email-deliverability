@@ -145,22 +145,27 @@ const result = await validateEmail("User+tag@Example.COM", {
   checks: { dns: true },
 });
 
-if (result.decision.accepted && result.parsed) {
+if (result.recommendation === "accept" && result.parsed) {
   console.log(result.parsed.normalized);
 } else {
-  console.log(result.issues);
+  console.log(result.status, result.reason);
 }
 ```
 
-`validateEmail(input, options)` returns a structured result instead of throwing by default. Facts, checks, policy decisions, and warnings must be separate so callers do not confuse syntax validity, DNS status, business policy, and SMTP diagnostics.
+`validateEmail(input, options)` returns a structured result instead of throwing by default. The simple top-level contract is `status`, `reason`, and `recommendation`; detailed facts, checks, policy decisions, and warnings stay underneath so callers do not confuse syntax validity, DNS status, business policy, and SMTP diagnostics.
+
+`status`, `reason`, and `recommendation` summarize the best deliverability action from the checks that actually ran. `valid` and `decision.accepted` reflect configured blocking policy. They may differ for explicitly diagnostic checks, such as SMTP mailbox rejection when `policy.blockOnSmtpRejection` is false.
 
 ```ts
 type EmailValidationResult = {
   input: string;
 
-  // Convenience decision derived from `decision.accepted`.
-  // It is not the source of truth for individual checks.
+  // Compatibility decision derived from `decision.accepted`.
+  // Product flows should prefer status/reason/recommendation.
   valid: boolean;
+  status: EmailStatus;
+  reason: EmailReason;
+  recommendation: EmailRecommendation;
 
   parsed?: {
     normalized: string;
@@ -184,11 +189,32 @@ type EmailValidationResult = {
   decision: {
     accepted: boolean;
     blockedBy: Array<{
-      policy: "syntax" | "dns" | "blockTypo" | "blockDisposable" | "requireBusinessEmail" | "blockOnSmtpRejection" | "requirePublicInternetDomain";
+      policy: "syntax" | "dns" | "blockTypo" | "blockDisposable" | "requireBusinessEmail" | "blockOnSmtpRejection" | "requirePublicInternetDomain" | "allowSpecialUseDomains";
       issueCode: string;
     }>;
   };
 };
+
+type EmailStatus = "deliverable" | "undeliverable" | "risky" | "unknown";
+
+type EmailReason =
+  | "accepted"
+  | "invalid_syntax"
+  | "not_public_domain"
+  | "no_mail_server"
+  | "domain_not_found"
+  | "mailbox_rejected"
+  | "catch_all"
+  | "smtp_tempfail"
+  | "smtp_timeout"
+  | "smtp_blocked"
+  | "smtp_error"
+  | "disposable"
+  | "free_provider"
+  | "typo"
+  | "inconclusive";
+
+type EmailRecommendation = "accept" | "reject" | "verify";
 
 type EmailIssue = {
   code: string;
@@ -357,7 +383,7 @@ type SmtpProbeOptions = {
   port?: number; // default 25
   tls?: "disable" | "opportunistic" | "require"; // default "opportunistic"
   allowPrivateNetworks?: boolean; // default false
-  detectCatchAll?: boolean; // default false
+  detectCatchAll?: boolean; // default true when SMTP probing is enabled
   catchAllAddressFactory?: () => string;
 };
 ```
@@ -374,7 +400,7 @@ For login paths, recommend `checks: { dns: false }` to avoid DNS work on every l
 
 Policy flags that require checks implicitly enable those checks. For example, `policy.blockDisposable: true` enables `checks.disposable`, and `policy.requireBusinessEmail: true` enables `checks.freeProvider`.
 
-When `checks.smtp: true`, SMTP remains diagnostic by default. It affects `decision.accepted` only when `policy.blockOnSmtpRejection` is explicitly true, and only for narrow permanent mailbox rejection results.
+When `checks.smtp: true`, SMTP remains diagnostic by default and runs catch-all detection after the target recipient is accepted. Permanent recipient rejection is surfaced in top-level `status/reason/recommendation`; it affects `decision.accepted` only when `policy.blockOnSmtpRejection` is explicitly true, and only for narrow permanent mailbox rejection results.
 
 Timeout and cancellation precedence:
 
@@ -565,7 +591,7 @@ Rules:
 - Probe with `MAIL FROM` and `RCPT TO`, then quit without sending DATA.
 - Return `valid: true | false | null`, where `null` means inconclusive.
 - Most operational failures must return `valid: null`, not `false`. Examples: blocked port 25, provider tarpitting, greylisting, catch-all ambiguity, proxy/network failure, TLS negotiation failure, unsupported SMTPUTF8, or provider status hiding.
-- Detect catch-all behavior only when explicitly enabled and with a randomized address.
+- Detect catch-all behavior by default when SMTP probing is enabled and the target recipient is accepted; use a randomized address and allow `smtp.detectCatchAll: false` to opt out.
 - Rate-limit/concurrency-limit batch SMTP probes.
 - Do not include proxy management, SOCKS support, headless provider automation, provider-specific bypass logic, SMTP relay routing, Docker images, or native addons in v1. Those are infrastructure-product concerns, not a small library contract.
 - Resolve MX targets to IP addresses and block private, loopback, link-local, multicast, documentation, and otherwise reserved ranges by default before opening TCP sockets.

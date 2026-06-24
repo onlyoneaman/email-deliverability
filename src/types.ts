@@ -68,6 +68,27 @@ export type SmtpProbeCheck = CheckBase & {
   valid?: true | false | null;
 };
 
+export type EmailStatus = "deliverable" | "undeliverable" | "risky" | "unknown";
+
+export type EmailReason =
+  | "accepted"
+  | "invalid_syntax"
+  | "not_public_domain"
+  | "no_mail_server"
+  | "domain_not_found"
+  | "mailbox_rejected"
+  | "catch_all"
+  | "smtp_tempfail"
+  | "smtp_timeout"
+  | "smtp_blocked"
+  | "smtp_error"
+  | "disposable"
+  | "free_provider"
+  | "typo"
+  | "inconclusive";
+
+export type EmailRecommendation = "accept" | "reject" | "verify";
+
 export type ParsedEmail = {
   normalized: string;
   local: string;
@@ -80,6 +101,9 @@ export type ParsedEmail = {
 export type EmailValidationResult = {
   input: string;
   valid: boolean;
+  status: EmailStatus;
+  reason: EmailReason;
+  recommendation: EmailRecommendation;
   parsed?: ParsedEmail;
   checks: {
     syntax: SyntaxCheck;

@@ -17,6 +17,9 @@ describe("core parsing and result model", () => {
 
     expect(result.valid).toBe(true);
     expect(result.decision.accepted).toBe(true);
+    expect(result.status).toBe("unknown");
+    expect(result.reason).toBe("inconclusive");
+    expect(result.recommendation).toBe("accept");
     expect(result.parsed).toEqual({
       normalized: "User+tag@example.com",
       local: "User+tag",
@@ -37,6 +40,9 @@ describe("core parsing and result model", () => {
     });
 
     expect(result.valid).toBe(false);
+    expect(result.status).toBe("undeliverable");
+    expect(result.reason).toBe("invalid_syntax");
+    expect(result.recommendation).toBe("reject");
     expect(result.parsed).toBeUndefined();
     expect(result.checks.syntax.status).toBe("fail");
     expect(result.decision.blockedBy).toEqual([
@@ -72,6 +78,9 @@ describe("core parsing and result model", () => {
     });
 
     expect(blocked.valid).toBe(false);
+    expect(blocked.status).toBe("undeliverable");
+    expect(blocked.reason).toBe("not_public_domain");
+    expect(blocked.recommendation).toBe("reject");
     expect(blocked.issues.map((issue) => issue.code)).toContain(
       "email.policy.special_use_domain",
     );
@@ -197,6 +206,9 @@ describe("core parsing and result model", () => {
     });
 
     expect(dns.valid).toBe(false);
+    expect(dns.status).toBe("unknown");
+    expect(dns.reason).toBe("inconclusive");
+    expect(dns.recommendation).toBe("verify");
     expect(dns.issues[0]?.code).toBe("email.dns.not_checked");
   });
 });

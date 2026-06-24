@@ -105,7 +105,7 @@ export async function checkSmtpProbe(args: {
 
     const rcpt = await command(connection, `RCPT TO:<${rcptTo}>`, args.options, timeoutMs);
     if (rcpt.code === 250 || rcpt.code === 251) {
-      if (args.options.smtp?.detectCatchAll) {
+      if (args.options.smtp?.detectCatchAll !== false) {
         const catchAll = await checkCatchAll(connection, args, timeoutMs);
         if (catchAll) return catchAll;
       }

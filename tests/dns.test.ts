@@ -92,6 +92,9 @@ describe("DNS deliverability", () => {
     });
 
     expect(result.valid).toBe(true);
+    expect(result.status).toBe("risky");
+    expect(result.reason).toBe("inconclusive");
+    expect(result.recommendation).toBe("verify");
     expect(result.checks.dns.status).toBe("warning");
     expect(result.checks.dns.deliverability).toBe("risky");
     expect(result.issues[0]?.code).toBe("email.dns.malformed_null_mx");
@@ -166,6 +169,9 @@ describe("DNS deliverability", () => {
     expect(noRecords.valid).toBe(true);
     expect(noRecords.issues[0]?.affectsValidity).toBe(false);
     expect(notFound.valid).toBe(true);
+    expect(notFound.status).toBe("undeliverable");
+    expect(notFound.reason).toBe("domain_not_found");
+    expect(notFound.recommendation).toBe("reject");
     expect(notFound.issues[0]?.affectsValidity).toBe(false);
   });
 

@@ -32,6 +32,12 @@ artifact.
   unless the package contract is deliberately changed.
 - Do not make SMTP probing default-proof of mailbox existence. It is diagnostic
   only.
+- Keep the primary validation call simple: `validateEmail(email)` returns
+  top-level `status`, `reason`, and `recommendation`; detailed evidence belongs
+  in `checks`, `issues`, and `decision.blockedBy`.
+- When SMTP is enabled, catch-all detection is on by default after the target
+  recipient is accepted. Use `smtp.detectCatchAll: false` only as an explicit
+  low-level opt-out.
 - Do not weaken SMTP private/reserved network blocking without explicit security
   review and tests.
 

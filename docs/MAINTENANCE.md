@@ -42,9 +42,11 @@ user-controlled domains. Preserve these rules:
 - Block private, loopback, link-local, documentation, multicast, ULA, 6to4,
   Teredo, CGNAT, NAT64, and IPv4-mapped private/reserved targets by default.
 - Keep CRLF injection checks on sender, HELO, recipient, and catch-all probes.
-- Keep SMTP opt-in unless a policy explicitly needs SMTP rejection blocking.
+- Keep SMTP probing opt-in for `validateEmail`; direct `probeSmtp()` is always
+  explicit.
 - Treat SMTP accepted responses as a signal, not proof of mailbox existence.
-- Keep catch-all detection opt-in.
+- When SMTP is enabled, keep catch-all detection on by default after a target
+  recipient is accepted. `smtp.detectCatchAll: false` is the low-level opt-out.
 
 Any change to SMTP targeting or address blocking needs tests for IPv4 and IPv6.
 
@@ -115,3 +117,11 @@ Be careful with:
 - remote verification APIs
 - permissive network behavior that weakens SSRF protections
 - adding large datasets without a size and licensing review
+
+## Result Contract
+
+Use `status`, `reason`, and `recommendation` as the simple product-facing result.
+Keep detailed evidence in `checks`, `issues`, and `decision.blockedBy`.
+
+Avoid changes that force callers to interpret SMTP internals before they can
+decide whether to accept, reject, or verify an address.

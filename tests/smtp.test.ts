@@ -55,7 +55,12 @@ describe("SMTP probing", () => {
 
     const check = await probeSmtp("user@example.com", {
       dns: { resolver: mxResolver() },
-      smtp: { connector: smtp.connector, tls: "disable", sender: "probe@example.com" },
+      smtp: {
+        connector: smtp.connector,
+        tls: "disable",
+        sender: "probe@example.com",
+        detectCatchAll: false,
+      },
       policy: { allowSpecialUseDomains: true },
     });
 
@@ -89,6 +94,31 @@ describe("SMTP probing", () => {
     expect(result.checks.smtp.valid).toBe(false);
     expect(result.checks.smtp.reasons).toEqual(["mailbox_rejected"]);
     expect(result.issues[0]?.code).toBe("email.smtp.rejected");
+  });
+
+  test("SMTP recipient rejection is surfaced in summary even when diagnostic", async () => {
+    const smtp = scriptedConnector([
+      "220 mx.example.com ESMTP",
+      "250 mx.example.com",
+      "250 OK",
+      "550 No such user",
+    ]);
+
+    const result = await validateEmail("missing@example.com", {
+      checks: { smtp: true },
+      dns: { resolver: mxResolver() },
+      smtp: { connector: smtp.connector, tls: "disable" },
+      policy: { allowSpecialUseDomains: true },
+    });
+
+    expect(result.valid).toBe(true);
+    expect(result.decision.accepted).toBe(true);
+    expect(result.status).toBe("undeliverable");
+    expect(result.reason).toBe("mailbox_rejected");
+    expect(result.recommendation).toBe("reject");
+    expect(result.checks.smtp.status).toBe("fail");
+    expect(result.checks.smtp.valid).toBe(false);
+    expect(result.issues).toEqual([]);
   });
 
   test("blockOnSmtpRejection policy implicitly enables SMTP", async () => {
@@ -137,7 +167,12 @@ describe("SMTP probing", () => {
 
     const check = await probeSmtp("user@example.com", {
       dns: { resolver: mxResolver() },
-      smtp: { connector: smtp.connector, tls: "disable", heloName: "client.example" },
+      smtp: {
+        connector: smtp.connector,
+        tls: "disable",
+        heloName: "client.example",
+        detectCatchAll: false,
+      },
       policy: { allowSpecialUseDomains: true },
     });
 
@@ -146,7 +181,7 @@ describe("SMTP probing", () => {
     expect(smtp.writes[1]).toBe("HELO client.example");
   });
 
-  test("catch-all detection is opt-in and returns inconclusive", async () => {
+  test("catch-all detection runs by default and returns inconclusive", async () => {
     const smtp = scriptedConnector([
       "220 mx.example.com ESMTP",
       "250 mx.example.com",
@@ -160,7 +195,6 @@ describe("SMTP probing", () => {
       smtp: {
         connector: smtp.connector,
         tls: "disable",
-        detectCatchAll: true,
         catchAllAddressFactory: () => "unlikely-catchall@example.com",
       },
       policy: { allowSpecialUseDomains: true },
@@ -170,6 +204,89 @@ describe("SMTP probing", () => {
     expect(check.valid).toBeNull();
     expect(check.reasons).toEqual(["catch_all"]);
     expect(smtp.writes.at(-1)).toBe("RCPT TO:<unlikely-catchall@example.com>");
+  });
+
+  test("SMTP accepted with catch-all rejected becomes deliverable summary", async () => {
+    const smtp = scriptedConnector([
+      "220 mx.example.com ESMTP",
+      "250 mx.example.com",
+      "250 OK",
+      "250 Accepted",
+      "550 No such user",
+    ]);
+
+    const result = await validateEmail("user@example.com", {
+      checks: { smtp: true },
+      dns: { resolver: mxResolver() },
+      smtp: {
+        connector: smtp.connector,
+        tls: "disable",
+        catchAllAddressFactory: () => "unlikely-catchall@example.com",
+      },
+      policy: { allowSpecialUseDomains: true },
+    });
+
+    expect(result.valid).toBe(true);
+    expect(result.status).toBe("deliverable");
+    expect(result.reason).toBe("accepted");
+    expect(result.recommendation).toBe("accept");
+    expect(result.checks.smtp.status).toBe("pass");
+    expect(result.checks.smtp.valid).toBe(true);
+  });
+
+  test("SMTP catch-all becomes risky verify summary", async () => {
+    const smtp = scriptedConnector([
+      "220 mx.example.com ESMTP",
+      "250 mx.example.com",
+      "250 OK",
+      "250 Accepted",
+      "250 Accepted",
+    ]);
+
+    const result = await validateEmail("user@example.com", {
+      checks: { smtp: true },
+      dns: { resolver: mxResolver() },
+      smtp: {
+        connector: smtp.connector,
+        tls: "disable",
+        catchAllAddressFactory: () => "unlikely-catchall@example.com",
+      },
+      policy: { allowSpecialUseDomains: true },
+    });
+
+    expect(result.valid).toBe(true);
+    expect(result.status).toBe("risky");
+    expect(result.reason).toBe("catch_all");
+    expect(result.recommendation).toBe("verify");
+    expect(result.checks.smtp.status).toBe("warning");
+    expect(result.checks.smtp.valid).toBeNull();
+  });
+
+  test("invalid SMTP catch-all probe options do not look deliverable", async () => {
+    const smtp = scriptedConnector([
+      "220 mx.example.com ESMTP",
+      "250 mx.example.com",
+      "250 OK",
+      "250 Accepted",
+    ]);
+
+    const result = await validateEmail("user@example.com", {
+      checks: { smtp: true },
+      dns: { resolver: mxResolver() },
+      smtp: {
+        connector: smtp.connector,
+        tls: "disable",
+        catchAllAddressFactory: () => "bad\r\nRCPT TO:<attacker@example.com>",
+      },
+      policy: { allowSpecialUseDomains: true },
+    });
+
+    expect(result.valid).toBe(true);
+    expect(result.status).toBe("unknown");
+    expect(result.reason).toBe("smtp_error");
+    expect(result.recommendation).toBe("verify");
+    expect(result.checks.smtp.status).toBe("fail");
+    expect(result.checks.smtp.reasons).toEqual(["invalid_option"]);
   });
 
   test("explicit SMTP check reports dependency state instead of staying not_checked", async () => {

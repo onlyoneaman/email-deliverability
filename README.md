@@ -26,16 +26,20 @@ import { validateEmail } from "email-deliverability";
 
 const result = await validateEmail("User+tag@Example.COM");
 
-if (result.decision.accepted && result.parsed) {
+if (result.recommendation === "accept" && result.parsed) {
   console.log(result.parsed.normalized);
 } else {
-  console.log(result.issues);
+  console.log(result.status, result.reason);
 }
 ```
 
-`valid` is a convenience alias for `decision.accepted`. For product flows, use
-the structured `checks`, `issues`, and `decision.blockedBy` fields instead of
-parsing human-readable messages.
+Use `status`, `reason`, and `recommendation` for product decisions. Use
+`checks`, `issues`, and `decision.blockedBy` when you need the detailed audit
+trail behind that summary.
+
+`valid` and `decision.accepted` reflect the blocking policy you configured.
+They can stay `true` for diagnostic findings, such as SMTP rejection without
+`policy.blockOnSmtpRejection`. The top-level summary still surfaces those facts.
 
 ## What This Checks
 
@@ -140,6 +144,10 @@ await validateEmail(email, {
 });
 ```
 
+When SMTP is enabled, catch-all detection runs by default after the target
+recipient is accepted. Set `smtp.detectCatchAll: false` only when you are doing a
+low-level probe and do not want the extra randomized RCPT check.
+
 SMTP rejection affects `decision.accepted` only when you explicitly ask for it:
 
 ```ts
@@ -202,6 +210,9 @@ const result = await validateEmail("user@gmail.com", {
   checks: { dns: true, freeProvider: true },
 });
 
+result.status; // "deliverable" | "undeliverable" | "risky" | "unknown"
+result.reason; // "accepted" | "catch_all" | "no_mail_server" | ...
+result.recommendation; // "accept" | "reject" | "verify"
 result.checks.syntax.status; // "pass" | "fail"
 result.checks.dns.deliverability; // "deliverable" | "undeliverable" | ...
 result.checks.freeProvider.freeProvider; // boolean | undefined

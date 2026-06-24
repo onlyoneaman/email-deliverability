@@ -120,7 +120,7 @@ describe("batch validation", () => {
       {
         checks: { smtp: true },
         dns: { resolver },
-        smtp: { connector, tls: "disable" },
+        smtp: { connector, tls: "disable", detectCatchAll: false },
         policy: { allowSpecialUseDomains: true },
         batch: { concurrency: 4, smtpConcurrency: 1 },
       },
@@ -183,7 +183,7 @@ describe("batch validation", () => {
     await validateEmails(["a@one.com", "a@two.com"], {
       checks: { smtp: true },
       dns: { resolver },
-      smtp: { connector },
+      smtp: { connector, detectCatchAll: false },
       policy: { allowSpecialUseDomains: true },
       batch: { concurrency: 2, smtpConcurrency: 1 },
     });
