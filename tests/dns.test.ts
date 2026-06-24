@@ -54,6 +54,94 @@ describe("DNS deliverability", () => {
     expect(result.checks.dns.mxRecords).toEqual([
       { exchange: "mx.example.com", priority: 10 },
     ]);
+    expect(result.checks.dns.provider).toBeUndefined();
+  });
+
+  test("infers common mail providers from MX records", async () => {
+    const cases = [
+      ["ASPMX.L.GOOGLE.COM", "google_workspace", "Google Workspace"],
+      ["example-com.mail.protection.outlook.com", "microsoft_365", "Microsoft 365"],
+      ["route1.mx.cloudflare.net", "cloudflare_email_routing", "Cloudflare Email Routing"],
+      ["in1-smtp.messagingengine.com", "fastmail", "Fastmail"],
+      ["mx.zoho.com", "zoho_mail", "Zoho Mail"],
+      ["mail.protonmail.ch", "proton_mail", "Proton Mail"],
+      ["mx01.mail.icloud.com", "icloud_mail", "iCloud Mail"],
+      ["mx.yandex.net", "yandex_mail", "Yandex Mail"],
+      ["mxbiz1.qq.com", "tencent_exmail", "Tencent Exmail"],
+      ["mx1.qiye.aliyun.com", "alibaba_cloud_mail", "Alibaba Cloud Mail"],
+      ["mx1.privateemail.com", "namecheap_private_email", "Namecheap Private Email"],
+      ["mx1.titan.email", "titan_email", "Titan Email"],
+      ["mx1.improvmx.com", "improvmx", "ImprovMX"],
+      ["mx1.forwardemail.net", "forwardemail", "Forward Email"],
+      ["mxa.mailgun.org", "mailgun", "Mailgun"],
+      ["mx.sendgrid.net", "sendgrid", "SendGrid"],
+      ["inbound.postmarkapp.com", "postmark", "Postmark"],
+      ["inbound-smtp.us-east-1.amazonaws.com", "amazon_ses", "Amazon SES"],
+      ["mx1.emailsrvr.com", "rackspace_email", "Rackspace Email"],
+      ["smtp.secureserver.net", "godaddy_email", "GoDaddy Email"],
+      ["mx1.dreamhost.com", "dreamhost_email", "DreamHost Email"],
+      ["spool.mail.gandi.net", "gandi_mail", "Gandi Mail"],
+      ["mxext1.mailbox.org", "mailbox_org", "mailbox.org"],
+      ["aspmx1.migadu.com", "migadu", "Migadu"],
+      ["mailserver.purelymail.com", "purelymail", "Purelymail"],
+      ["mail.tutanota.de", "tuta_mail", "Tuta Mail"],
+      ["mx1.mailfence.com", "mailfence", "Mailfence"],
+      ["one.mxrouting.com", "mxroute", "MXroute"],
+    ] as const;
+
+    for (const [exchange, id, name] of cases) {
+      const result = await validateEmail("a@example.com", {
+        dns: { resolver: resolver({ mx: [{ exchange, priority: 1 }] }) },
+        policy: { allowSpecialUseDomains: true },
+      });
+
+      expect(result.checks.dns.provider).toMatchObject({
+        id,
+        name,
+        source: "mx",
+        mxHost: exchange.toLowerCase(),
+      });
+    }
+  });
+
+  test("marks known mixed MX providers without guessing one winner", async () => {
+    const result = await validateEmail("a@example.com", {
+      dns: {
+        resolver: resolver({
+          mx: [
+            { exchange: "ASPMX.L.GOOGLE.COM", priority: 1 },
+            { exchange: "example-com.mail.protection.outlook.com", priority: 5 },
+          ],
+        }),
+      },
+      policy: { allowSpecialUseDomains: true },
+    });
+
+    expect(result.checks.dns.provider).toEqual({
+      id: "mixed",
+      name: "Mixed mail providers",
+      source: "mx",
+      confidence: "medium",
+      mxHost: "aspmx.l.google.com",
+    });
+  });
+
+  test("does not infer providers from near-miss MX hostnames", async () => {
+    const exchanges = [
+      "example.mail.protection.outlook.com.evil.test",
+      "inbound-smtp.us-east-1.amazonaws.com.evil.test",
+      "smtp.secureserver.net.evil.test",
+      "mxrouting.com.evil.test",
+    ];
+
+    for (const exchange of exchanges) {
+      const result = await validateEmail("a@example.com", {
+        dns: { resolver: resolver({ mx: [{ exchange, priority: 1 }] }) },
+        policy: { allowSpecialUseDomains: true },
+      });
+
+      expect(result.checks.dns.provider).toBeUndefined();
+    }
   });
 
   test("detects RFC Null MX as undeliverable and blocks by default", async () => {

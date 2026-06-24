@@ -41,6 +41,46 @@ export type DnsDeliverabilityCheck = CheckBase & {
   status: "not_checked" | "pass" | "fail" | "warning" | "unknown" | "timeout" | "error";
   deliverability?: "deliverable" | "undeliverable" | "risky" | "unknown";
   mxRecords?: Array<{ exchange: string; priority: number }>;
+  provider?: DnsProviderInfo;
+};
+
+export type DnsProviderId =
+  | "google_workspace"
+  | "microsoft_365"
+  | "cloudflare_email_routing"
+  | "fastmail"
+  | "zoho_mail"
+  | "proton_mail"
+  | "icloud_mail"
+  | "yandex_mail"
+  | "tencent_exmail"
+  | "alibaba_cloud_mail"
+  | "namecheap_private_email"
+  | "titan_email"
+  | "improvmx"
+  | "forwardemail"
+  | "mailgun"
+  | "sendgrid"
+  | "postmark"
+  | "amazon_ses"
+  | "rackspace_email"
+  | "godaddy_email"
+  | "dreamhost_email"
+  | "gandi_mail"
+  | "mailbox_org"
+  | "migadu"
+  | "purelymail"
+  | "tuta_mail"
+  | "mailfence"
+  | "mxroute"
+  | "mixed";
+
+export type DnsProviderInfo = {
+  id: DnsProviderId;
+  name: string;
+  source: "mx";
+  confidence: "high" | "medium";
+  mxHost: string;
 };
 
 export type TypoCheck = CheckBase & {

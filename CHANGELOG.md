@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.0 - 2026-06-24
+
+- Added `checks.dns.provider` to infer common mail providers from MX records.
+- Added typed IDs for 28 common hosted mail, routing, and inbound providers, plus mixed known-provider setups.
+- Kept provider inference conservative and MX-based; unknown providers are left unset instead of guessed.
+
 ## 0.2.0 - 2026-06-24
 
 - Added top-level `status`, `reason`, and `recommendation` fields to `validateEmail()` results for simpler product decisions.

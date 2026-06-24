@@ -254,7 +254,27 @@ type DnsDeliverabilityCheck = CheckBase & {
   status: "not_checked" | "pass" | "fail" | "warning" | "unknown" | "timeout" | "error";
   deliverability?: "deliverable" | "undeliverable" | "risky" | "unknown";
   mxRecords?: Array<{ exchange: string; priority: number }>;
+  provider?: DnsProviderInfo;
 };
+
+type DnsProviderInfo = {
+  id: DnsProviderId;
+  name: string;
+  source: "mx";
+  confidence: "high" | "medium";
+  mxHost: string;
+};
+
+type DnsProviderId =
+  | "google_workspace" | "microsoft_365" | "cloudflare_email_routing"
+  | "fastmail" | "zoho_mail" | "proton_mail" | "icloud_mail"
+  | "yandex_mail" | "tencent_exmail" | "alibaba_cloud_mail"
+  | "namecheap_private_email" | "titan_email" | "improvmx"
+  | "forwardemail" | "mailgun" | "sendgrid" | "postmark"
+  | "amazon_ses" | "rackspace_email" | "godaddy_email"
+  | "dreamhost_email" | "gandi_mail" | "mailbox_org" | "migadu"
+  | "purelymail" | "tuta_mail" | "mailfence" | "mxroute"
+  | "mixed";
 
 type TypoCheck = CheckBase & {
   status: "not_checked" | "pass" | "warning";
@@ -501,6 +521,7 @@ Checks:
 - if fallback A/AAAA exists, treat as deliverable;
 - do not treat SPF `-all` as receive-mail deliverability evidence. SPF is sending policy only and may be exposed separately as metadata/warning, not as undeliverable.
 - return DNS response metadata and reason codes;
+- infer common mail providers from MX hostnames via `checks.dns.provider`;
 - honor `dns.timeoutMs`;
 - support injected resolver for tests, custom DNS, and caching;
 - support built-in small LRU/TTL cache through `createEmailValidator`.

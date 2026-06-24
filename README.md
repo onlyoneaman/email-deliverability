@@ -215,10 +215,15 @@ result.reason; // "accepted" | "catch_all" | "no_mail_server" | ...
 result.recommendation; // "accept" | "reject" | "verify"
 result.checks.syntax.status; // "pass" | "fail"
 result.checks.dns.deliverability; // "deliverable" | "undeliverable" | ...
+result.checks.dns.provider?.id; // "google_workspace" | "cloudflare_email_routing" | ...
 result.checks.freeProvider.freeProvider; // boolean | undefined
 result.issues; // stable codes, stages, messages, paths
 result.decision.blockedBy; // policy decisions only
 ```
+
+DNS provider inference is based on MX hostnames and is conservative. Unknown
+providers are left unset; mixed known MX providers return `provider.id:
+"mixed"`.
 
 Machine-readable `issue.code`, `issue.stage`, `issue.path`, and
 `issue.params` are the integration surface. `issue.message` is display text.

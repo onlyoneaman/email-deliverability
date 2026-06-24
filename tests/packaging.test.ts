@@ -72,6 +72,8 @@ describe("package scaffold", () => {
 
     expect(typeof pkg.validateEmail).toBe("function");
     expect(typeof pkg.probeSmtp).toBe("function");
+    expect(types).toContain("DnsProviderId");
+    expect(types).toContain("DnsProviderInfo");
     expect(types).toContain("detectCatchAll");
     expect(types).toContain("catchAllAddressFactory");
     expect(smtp).toContain("catch_all");

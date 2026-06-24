@@ -2,6 +2,8 @@ import { lookup, resolve4, resolve6, resolveMx } from "node:dns/promises";
 import { issue } from "./result.js";
 import type {
   DnsDeliverabilityCheck,
+  DnsProviderId,
+  DnsProviderInfo,
   EmailDnsResolver,
   EmailIssue,
   EmailValidationCache,
@@ -65,6 +67,7 @@ export async function checkDnsDeliverability(args: {
       }),
     );
     const sortedMx = [...mxRecords].sort((left, right) => left.priority - right.priority);
+    const provider = inferDnsProvider(sortedMx);
 
     if (isNullMx(sortedMx)) {
       const code = "email.dns.null_mx";
@@ -81,7 +84,7 @@ export async function checkDnsDeliverability(args: {
     }
 
     if (sortedMx.some((record) => isNullMxExchange(record.exchange))) {
-      return warningResult(startedAt, "malformed_null_mx", "email.dns.malformed_null_mx", args.options, sortedMx);
+      return warningResult(startedAt, "malformed_null_mx", "email.dns.malformed_null_mx", args.options, sortedMx, provider);
     }
 
     if (sortedMx.length > 0) {
@@ -91,6 +94,7 @@ export async function checkDnsDeliverability(args: {
           reasons: ["mx_found"],
           deliverability: "deliverable",
           mxRecords: sortedMx,
+          ...(provider ? { provider } : {}),
           durationMs: elapsed(startedAt),
         },
         issues: [],
@@ -208,6 +212,7 @@ function warningResult(
   code: string,
   options: ValidateEmailOptions,
   mxRecords?: Array<{ exchange: string; priority: number }>,
+  provider?: DnsProviderInfo,
 ): { check: DnsDeliverabilityCheck; issues: EmailIssue[] } {
   const strict = options.policy?.requireDnsDeliverable === "strict";
   return {
@@ -216,6 +221,7 @@ function warningResult(
       reasons: [reason],
       deliverability: reason === "malformed_null_mx" ? "risky" : "unknown",
       ...(mxRecords ? { mxRecords } : {}),
+      ...(provider ? { provider } : {}),
       durationMs: elapsed(startedAt),
     },
     issues: [issue(code, "dns", strict, { path: ["domain"], severity: strict ? "error" : "warning" })],
@@ -287,6 +293,73 @@ function isNoDataError(error: unknown): boolean {
     "code" in error &&
     error.code === "ENODATA"
   );
+}
+
+type ProviderRule = readonly [Exclude<DnsProviderId, "mixed">, string, DnsProviderInfo["confidence"], readonly RegExp[]];
+
+const PROVIDER_RULES: readonly ProviderRule[] = [
+  ["google_workspace", "Google Workspace", "high", [/^(aspmx\d*|alt\d+\.aspmx)\.l\.google\.com$/, /^aspmx\d*\.googlemail\.com$/, /^smtp\.google\.com$/]],
+  ["microsoft_365", "Microsoft 365", "high", [/\.mail\.protection\.outlook\.com$/, /\.mail\.eo\.outlook\.com$/, /\.olc\.protection\.outlook\.com$/]],
+  ["cloudflare_email_routing", "Cloudflare Email Routing", "high", [/^route\d+\.mx\.cloudflare\.net$/]],
+  ["fastmail", "Fastmail", "high", [/^(in\d+[-.]smtp|smtp-in)\.messagingengine\.com$/]],
+  ["zoho_mail", "Zoho Mail", "high", [/^mx\d*\.zoho\.(com|eu|in|com\.au|jp|cn)$/, /^mx\d*\.zohomail\.(com|eu)$/]],
+  ["proton_mail", "Proton Mail", "high", [/^(mail|mailsec)\.protonmail\.ch$/, /^(mail|mailsec)\.proton\.me$/]],
+  ["icloud_mail", "iCloud Mail", "high", [/^mx0[12]\.mail\.icloud\.com$/]],
+  ["yandex_mail", "Yandex Mail", "high", [/^mx\.yandex\.net$/]],
+  ["tencent_exmail", "Tencent Exmail", "high", [/^mxbiz[12]\.qq\.com$/]],
+  ["alibaba_cloud_mail", "Alibaba Cloud Mail", "high", [/^mx[12]\.qiye\.aliyun\.com$/, /^mx[12]\.aliyun\.com$/]],
+  ["namecheap_private_email", "Namecheap Private Email", "high", [/^mx[12]\.privateemail\.com$/]],
+  ["titan_email", "Titan Email", "high", [/^mx[12]\.titan\.email$/]],
+  ["improvmx", "ImprovMX", "high", [/^mx[12]\.improvmx\.com$/]],
+  ["forwardemail", "Forward Email", "high", [/^mx[12]\.forwardemail\.net$/]],
+  ["mailgun", "Mailgun", "high", [/^mx[ab]\.mailgun\.org$/]],
+  ["sendgrid", "SendGrid", "high", [/^mx\.sendgrid\.net$/]],
+  ["postmark", "Postmark", "high", [/^inbound\.postmarkapp\.com$/]],
+  ["amazon_ses", "Amazon SES", "medium", [/^inbound-smtp\.[a-z0-9-]+\.amazonaws\.com$/]],
+  ["rackspace_email", "Rackspace Email", "high", [/^mx[12]\.emailsrvr\.com$/]],
+  ["godaddy_email", "GoDaddy Email", "medium", [/^(smtp|mailstore1)\.secureserver\.net$/]],
+  ["dreamhost_email", "DreamHost Email", "high", [/^mx[12]\.dreamhost\.com$/]],
+  ["gandi_mail", "Gandi Mail", "high", [/^(spool|fb)\.mail\.gandi\.net$/]],
+  ["mailbox_org", "mailbox.org", "high", [/^mxext[123]\.mailbox\.org$/]],
+  ["migadu", "Migadu", "high", [/^aspmx[12]\.migadu\.com$/]],
+  ["purelymail", "Purelymail", "high", [/^mailserver\.purelymail\.com$/]],
+  ["tuta_mail", "Tuta Mail", "high", [/^(mail|mailsec)\.tutanota\.de$/]],
+  ["mailfence", "Mailfence", "high", [/^mx[12]\.mailfence\.com$/]],
+  ["mxroute", "MXroute", "medium", [/\.(mxrouting|mxlogin)\.com$/]],
+];
+
+function inferDnsProvider(records: Array<{ exchange: string; priority: number }>): DnsProviderInfo | undefined {
+  const matches = records
+    .map((record) => {
+      const mxHost = record.exchange.toLowerCase().replace(/\.$/, "");
+      const rule = PROVIDER_RULES.find((candidate) =>
+        candidate[3].some((pattern) => pattern.test(mxHost)),
+      );
+      return rule ? { rule, mxHost } : undefined;
+    })
+    .filter((entry): entry is { rule: ProviderRule; mxHost: string } => Boolean(entry));
+  if (matches.length === 0) return undefined;
+
+  const ids = new Set(matches.map((entry) => entry.rule[0]));
+  if (ids.size > 1) {
+    return {
+      id: "mixed",
+      name: "Mixed mail providers",
+      source: "mx",
+      confidence: "medium",
+      mxHost: matches[0]?.mxHost ?? "",
+    };
+  }
+
+  const primary = matches[0];
+  if (!primary) return undefined;
+  return {
+    id: primary.rule[0],
+    name: primary.rule[1],
+    source: "mx",
+    confidence: primary.rule[2],
+    mxHost: primary.mxHost,
+  };
 }
 
 function elapsed(startedAt: number): number {
