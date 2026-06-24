@@ -1,6 +1,6 @@
 {
   "name": "email-deliverability",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Honest email validation, normalization, DNS deliverability checks, and SMTP diagnostics for Node.js and Bun.",
   "type": "module",
   "types": "./dist/index.d.ts",
