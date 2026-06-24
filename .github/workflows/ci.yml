@@ -43,6 +43,14 @@ jobs:
       - run: bun run build
       - run: bun test
       - run: bun run typecheck
+      - name: Check whether this version is already published
+        id: npm-version
+        run: |
+          VERSION="$(node -p "require('./package.json').version")"
+          if npm view "email-deliverability@$VERSION" version >/dev/null 2>&1; then
+            echo "published=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "published=false" >> "$GITHUB_OUTPUT"
+          fi
       - run: npm publish --provenance --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        if: steps.npm-version.outputs.published != 'true'
