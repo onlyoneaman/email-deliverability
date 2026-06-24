@@ -67,6 +67,9 @@
     "build": "bun run clean && tsc -p tsconfig.build.json",
     "clean": "rm -rf dist",
     "typecheck": "tsc --noEmit -p tsconfig.json",
+    "datasets:verify": "node scripts/verify-datasets.mjs",
+    "release:check": "node scripts/verify-release.mjs",
+    "release:published": "node scripts/verify-release.mjs --published",
     "pack:dry": "npm pack --dry-run",
     "prepack": "bun run build",
     "prepublishOnly": "bun test && bun run typecheck && bun run build"

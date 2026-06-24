@@ -38,12 +38,18 @@ describe("package scaffold", () => {
     }
   });
 
-  test("published documentation and notices exist", () => {
+  test("repository documentation and process scripts exist", () => {
     expect(existsSync("README.md")).toBe(true);
+    expect(existsSync("AGENTS.md")).toBe(true);
     expect(existsSync("LICENSE")).toBe(true);
     expect(existsSync("NOTICE")).toBe(true);
     expect(existsSync("CHANGELOG.md")).toBe(true);
     expect(existsSync("SECURITY.md")).toBe(true);
+    expect(existsSync("docs/CONTRACT.md")).toBe(true);
+    expect(existsSync("docs/RELEASE.md")).toBe(true);
+    expect(existsSync("docs/MAINTENANCE.md")).toBe(true);
+    expect(existsSync("scripts/verify-release.mjs")).toBe(true);
+    expect(existsSync("scripts/verify-datasets.mjs")).toBe(true);
   });
 
   test("browser bundle stays free of Node built-ins", async () => {

@@ -90,3 +90,12 @@ remote verification API. DNS and SMTP are server-side only.
 
 Browsers, edge runtimes, serverless platforms, and containers may block DNS or
 port 25. Disable those checks when they do not fit your runtime.
+
+## Maintainers
+
+Release and maintenance process lives in the repo:
+
+- [Agent notes](https://github.com/onlyoneaman/email-deliverability/blob/main/AGENTS.md)
+- [Package contract](https://github.com/onlyoneaman/email-deliverability/blob/main/docs/CONTRACT.md)
+- [Release process](https://github.com/onlyoneaman/email-deliverability/blob/main/docs/RELEASE.md)
+- [Maintenance notes](https://github.com/onlyoneaman/email-deliverability/blob/main/docs/MAINTENANCE.md)
