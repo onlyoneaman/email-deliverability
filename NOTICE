@@ -1,0 +1,14 @@
+email-deliverability
+
+This package bundles generated domain datasets from:
+
+- free-email-domains 1.9.45
+  Source: https://github.com/kikobeats/free-email-domains
+  License: MIT
+
+- disposable-email-domains-js 1.25.0
+  Source: https://github.com/mziyut/disposable-email-domains-js
+  License: CC0-1.0
+
+Dataset files are generated into the package for lookup convenience. Upstream
+licenses and provenance should be reviewed on every dataset refresh.
