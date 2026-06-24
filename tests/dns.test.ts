@@ -64,6 +64,7 @@ describe("DNS deliverability", () => {
       ["route1.mx.cloudflare.net", "cloudflare_email_routing", "Cloudflare Email Routing"],
       ["in1-smtp.messagingengine.com", "fastmail", "Fastmail"],
       ["mx.zoho.com", "zoho_mail", "Zoho Mail"],
+      ["smtpin2.zoho.com", "zoho_mail", "Zoho Mail"],
       ["mail.protonmail.ch", "proton_mail", "Proton Mail"],
       ["mx01.mail.icloud.com", "icloud_mail", "iCloud Mail"],
       ["mx.yandex.net", "yandex_mail", "Yandex Mail"],

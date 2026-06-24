@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.3.1 - 2026-06-24
+
+- Recognize Zoho-owned inbound MX hosts such as `smtpin2.zoho.com` as Zoho Mail.
+
 ## 0.3.0 - 2026-06-24
 
 - Added `checks.dns.provider` to infer common mail providers from MX records.

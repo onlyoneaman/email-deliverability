@@ -302,7 +302,7 @@ const PROVIDER_RULES: readonly ProviderRule[] = [
   ["microsoft_365", "Microsoft 365", "high", [/\.mail\.protection\.outlook\.com$/, /\.mail\.eo\.outlook\.com$/, /\.olc\.protection\.outlook\.com$/]],
   ["cloudflare_email_routing", "Cloudflare Email Routing", "high", [/^route\d+\.mx\.cloudflare\.net$/]],
   ["fastmail", "Fastmail", "high", [/^(in\d+[-.]smtp|smtp-in)\.messagingengine\.com$/]],
-  ["zoho_mail", "Zoho Mail", "high", [/^mx\d*\.zoho\.(com|eu|in|com\.au|jp|cn)$/, /^mx\d*\.zohomail\.(com|eu)$/]],
+  ["zoho_mail", "Zoho Mail", "high", [/^mx\d*\.zoho\.(com|eu|in|com\.au|jp|cn)$/, /^mx\d*\.zohomail\.(com|eu)$/, /^smtpin\d*\.zoho\.com$/]],
   ["proton_mail", "Proton Mail", "high", [/^(mail|mailsec)\.protonmail\.ch$/, /^(mail|mailsec)\.proton\.me$/]],
   ["icloud_mail", "iCloud Mail", "high", [/^mx0[12]\.mail\.icloud\.com$/]],
   ["yandex_mail", "Yandex Mail", "high", [/^mx\.yandex\.net$/]],
